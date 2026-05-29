@@ -42,6 +42,10 @@ vim.api.nvim_set_keymap('i', "'", "''<Left>", { noremap = true, silent = true })
 
 -- Vertical split
 vim.keymap.set('n', '<C-\\>', ':vsplit<CR>')
+vim.keymap.set('n', '<C-v>', ':vsplit<CR>')
+
+-- Horizontal split
+vim.keymap.set('n', '<C-h>', ':split<CR>')
 
 -- HTML auto-closing tags
 vim.keymap.set('n', '<C-s>', '<esc>yiwi<lt><esc>ea></><esc>hpF>i')
@@ -54,6 +58,7 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<C-k><w>', ':close<CR>', { desc = 'Close current window' })
 
 -- Floating diagnostic
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code actions" })
@@ -62,24 +67,29 @@ vim.keymap.set("n", "<leader>dl", function() vim.diagnostic.setloclist() end, { 
 
 -- Plugin setup
 vim.pack.add({
-	{ src = "https://github.com/neovim/nvim-lspconfig" },
-	{ src = "https://github.com/mason-org/mason.nvim" },
-	{ src = "https://github.com/stevearc/oil.nvim" },
-	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
-	{ src = "https://github.com/folke/lazydev.nvim" },
-	{ src = "https://github.com/nvim-telescope/telescope.nvim" },
-	{ src = "https://github.com/nvim-lua/plenary.nvim" },
-	{ src = "https://github.com/folke/which-key.nvim" },
-	{ src = "https://github.com/MagicDuck/grug-far.nvim"},
-	{ src = "https://github.com/mfussenegger/nvim-jdtls"},
-	{ src = "https://github.com/airblade/vim-gitgutter"}
+    { src = "https://github.com/neovim/nvim-lspconfig"},
+    { src = "https://github.com/mason-org/mason.nvim"},
+    { src = "https://github.com/stevearc/oil.nvim"},
+    { src = "https://github.com/nvim-treesitter/nvim-treesitter", version = "main" },
+    { src = "https://github.com/folke/lazydev.nvim"},
+    { src = "https://github.com/nvim-telescope/telescope.nvim"},
+    { src = "https://github.com/nvim-lua/plenary.nvim"},
+    { src = "https://github.com/folke/which-key.nvim"},
+    { src = "https://github.com/MagicDuck/grug-far.nvim"},
+    { src = "https://github.com/mfussenegger/nvim-jdtls"},
+    { src = "https://github.com/airblade/vim-gitgutter"},
+    { src = "https://github.com/nickjvandyke/opencode.nvim"},
+    { src = "https://github.com/github/copilot.vim"},
+    { src = "https://github.com/sindrets/diffview.nvim"},
+    { src = "https://github.com/nvim-tree/nvim-web-devicons"},
 })
 
-require "mason".setup()
-require "oil".setup()
-require "telescope".setup()
-require "which-key".setup()
-require "grug-far".setup()
+require("mason").setup()
+require("oil").setup()
+require("telescope").setup()
+require("which-key").setup()
+require("grug-far").setup()
+require("diffview").setup()
 
 -- Keymaps for plugins
 vim.keymap.set('n', '<leader>e', ":Oil<CR>", { desc = "Oil" })
@@ -89,6 +99,27 @@ vim.keymap.set('n', '<leader>ff', ":Telescope find_files<CR>", { desc = "Find fi
 vim.keymap.set('n', '<leader>fg', ":Telescope live_grep<CR>", { desc = "Grep" })
 vim.keymap.set('n', '<leader>fb', ":Telescope buffers<CR>", { desc = "Buffers" })
 vim.keymap.set('n', '<leader>sr', ":GrugFar<CR>", { desc = "Search/Replace" })
+vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
+vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Select opencode…" })
+vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
+vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
+vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
+vim.keymap.set("n", "<leader>gd", ":DiffviewOpen<CR>",        { desc = "Git diff" })
+vim.keymap.set("n", "<leader>gh", ":DiffviewFileHistory %<CR>", { desc = "File git history" })
+vim.keymap.set("n", "<leader>gc", ":DiffviewClose<CR>",       { desc = "Close diff" })
+
+-- Opencode settings
+vim.g.opencode_opts = {
+  -- your config here if needed
+}
+
+vim.o.autoread = true  -- required for events.reload
+
+-- Copilot blacklist
+vim.g.copilot_filetypes = {
+    zsh = false,
+    env = false,
+}
 
 -- LSP settings
 vim.cmd [[set completeopt+=menuone,noselect,popup]]
@@ -112,7 +143,6 @@ vim.lsp.enable({
 	"clangd",
 	"kotlin_lsp",
 	"ts_ls",
-	"jsonls",
 })
 
 vim.lsp.config("kotlin_lsp", {
@@ -134,10 +164,10 @@ vim.lsp.config("kotlin_lsp", {
 
 vim.lsp.enable('ts_ls')
 
-vim.lsp.config("jsonls", {
-	filetypes = {"json"},
-	root_markers = {"*.json"}
-})
+-- vim.lsp.config("jsonls", {
+-- 	filetypes = {"json"},
+-- 	root_markers = {"*.json"}
+-- })
 
 --vim.lsp.config('kotlin_lsp', {
 --    single_file_support = false,
