@@ -8,3 +8,5 @@ require('lsp.config')
 
 vim.cmd('colorscheme default')
 vim.cmd('hi statusline guibg=NONE')
+
+vim.o.background = "dark" -- or "light" for light mode

@@ -5,7 +5,6 @@ require('which-key').setup()
 require('grug-far').setup()
 require('diffview').setup()
 
-
 require('conform').setup({
     formatters_by_ft = {
         kotlin = { 'ktfmt', 'ktlint' },
