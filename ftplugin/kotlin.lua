@@ -1,5 +1,2 @@
--- reuse the same jdtls setup for kotlin files
-local ok, _ = pcall(require, "jdtls")
-if ok then
-    vim.cmd("runtime ftplugin/java.lua")
-end
+-- Kotlin uses kotlin_lsp, not jdtls. This ftplugin is no longer needed.
+-- LSP is configured in lua/lsp/config.lua
