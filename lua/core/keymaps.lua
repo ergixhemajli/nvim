@@ -50,3 +50,6 @@ keymap({ 'n', 'x' }, '<C-x>', function() require('opencode').select() end, { des
 keymap({ 'n', 't' }, '<C-.>', function() require('opencode').toggle() end, { desc = 'Toggle opencode' })
 keymap({ 'n', 'x' }, 'go', function() return require('opencode').operator('@this ') end, { desc = 'Add range to opencode', expr = true })
 keymap('n', 'goo', function() return require('opencode').operator('@this ') .. '_' end, { desc = 'Add line to opencode', expr = true })
+
+-- Escape terminal mode with Escape
+keymap('t', '<Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
