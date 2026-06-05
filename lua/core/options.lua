@@ -32,3 +32,14 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 		vim.highlight.on_yank()
 	end,
 })
+
+vim.api.nvim_create_user_command('ReloadConfig', function()
+	for name, _ in pairs(package.loaded) do
+		if name:match('^core') or name:match('^plugins') or name:match('^lsp') or name:match('^opencode') then
+			package.loaded[name] = nil
+		end
+	end
+
+	dofile(vim.fn.expand('$MYVIMRC'))
+	vim.notify('Config reloaded', vim.log.levels.INFO, { title = 'nvim' })
+end, { desc = 'Reload Neovim config' })

@@ -56,18 +56,3 @@ lsp.config('kotlin_lsp', {
 	end,
 })
 lsp.enable('kotlin_lsp')
-
--- Prettier (fallback formatter)
-lsp.config('prettierd', {
-	filetypes = {
-		'javascript', 'javascriptreact', 'typescript', 'typescriptreact',
-		'vue', 'css', 'scss', 'sass', 'less', 'html', 'json', 'yaml',
-		'markdown', 'markdown.mdx', 'graphql',
-	},
-	root_markers = {
-		'.prettierrc', '.prettierrc.json', '.prettierrc.yml',
-		'.prettierrc.yaml', '.prettierrc.js', '.prettierrc.cjs',
-		'package.json', '.git',
-	},
-})
-lsp.enable('prettierd')
