@@ -11,7 +11,7 @@ return {
     { src = 'https://github.com/MagicDuck/grug-far.nvim' },
     { src = 'https://github.com/mfussenegger/nvim-jdtls' },
     { src = 'https://github.com/airblade/vim-gitgutter' },
-    { src = 'https://github.com/nickjvandyke/opencode.nvim' },
+    -- { src = 'https://github.com/nickjvandyke/opencode.nvim' }, -- disabled while using pi
     { src = 'https://github.com/github/copilot.vim' },
     { src = 'https://github.com/sindrets/diffview.nvim' },
     { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
