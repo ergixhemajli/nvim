@@ -1,7 +1,11 @@
 require('mason').setup()
 require('oil').setup()
 require('telescope').setup()
-require('which-key').setup()
+require('which-key').setup({
+  triggers = {
+    { '<Space>', mode = 'nxso' },
+  },
+})
 require('grug-far').setup()
 require('diffview').setup()
 
