@@ -41,7 +41,9 @@ lsp.enable('jsonls')
 
 -- Kotlin
 lsp.config('kotlin_lsp', {
+	-- use faketime to fix the expired kotlin-lsp server binary from intellij
 	cmd = { 'kotlin-lsp', '--stdio' },
+	--cmd = { "faketime", "2026-06-04", "kotlin-lsp", "--stdio" },
 	filetypes = { 'kotlin' },
 	root_markers = {
 		'settings.gradle',

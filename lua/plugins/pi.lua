@@ -6,6 +6,13 @@ local state = {
   job = nil,
 }
 
+local function close_window_only()
+  if state.win and vim.api.nvim_win_is_valid(state.win) then
+    vim.api.nvim_win_close(state.win, true)
+  end
+  state.win = nil
+end
+
 local function is_valid_win(win)
   return win and vim.api.nvim_win_is_valid(win)
 end
@@ -284,6 +291,7 @@ end
 function M.open()
   if is_valid_win(state.win) then
     vim.api.nvim_set_current_win(state.win)
+    vim.cmd('startinsert')
     return
   end
 
@@ -293,6 +301,7 @@ function M.open()
     state.win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_buf(state.win, state.buf)
     vim.api.nvim_win_set_width(state.win, math.floor(vim.o.columns * 0.35))
+    vim.cmd('startinsert')
     vim.api.nvim_set_current_win(previous_win)
     return
   end
@@ -303,8 +312,8 @@ function M.open()
   clear_state()
 
   local previous_win = vim.api.nvim_get_current_win()
-  state.buf = vim.api.nvim_create_buf(false, true)
-  vim.bo[state.buf].bufhidden = 'hide'
+  state.buf = vim.api.nvim_create_buf(false, false)
+  vim.bo[state.buf].bufhidden = 'wipe'
   vim.bo[state.buf].filetype = 'pi'
 
   vim.cmd('vnew')
@@ -312,10 +321,28 @@ function M.open()
   vim.api.nvim_win_set_buf(state.win, state.buf)
   vim.api.nvim_win_set_width(state.win, math.floor(vim.o.columns * 0.35))
 
+  local redraw_auid
+  redraw_auid = vim.api.nvim_create_autocmd('TermRequest', {
+    buffer = state.buf,
+    callback = function(ev)
+      if ev.data.cursor[1] > 1 and is_valid_win(state.win) then
+        vim.api.nvim_del_autocmd(redraw_auid)
+        local current_win = vim.api.nvim_get_current_win()
+        vim.api.nvim_set_current_win(state.win)
+        vim.cmd([[startinsert | call feedkeys("\<C-\\>\<C-n>\<C-w>p", "n")]])
+        if vim.api.nvim_win_is_valid(current_win) then
+          vim.api.nvim_set_current_win(current_win)
+        end
+      end
+    end,
+  })
+
   state.job = vim.fn.jobstart('pi', {
     term = true,
     on_exit = function()
-      clear_state()
+      vim.schedule(function()
+        M.close()
+      end)
     end,
   })
 
@@ -326,9 +353,7 @@ function M.close()
   if state.job then
     vim.fn.jobstop(state.job)
   end
-  if is_valid_win(state.win) then
-    vim.api.nvim_win_close(state.win, true)
-  end
+  close_window_only()
   if is_valid_buf(state.buf) then
     vim.api.nvim_buf_delete(state.buf, { force = true })
   end
@@ -337,8 +362,7 @@ end
 
 function M.toggle()
   if is_valid_win(state.win) and is_valid_buf(state.buf) and state.job then
-    vim.api.nvim_win_hide(state.win)
-    state.win = nil
+    M.close()
   else
     M.open()
   end
@@ -347,6 +371,7 @@ end
 function M.focus()
   if is_valid_win(state.win) then
     vim.api.nvim_set_current_win(state.win)
+    vim.cmd('startinsert')
   end
 end
 
@@ -360,13 +385,24 @@ function M.send_input(input)
   end
 
   local function do_send()
-    if not state.job or state.job <= 0 then
+    if not state.job or state.job <= 0 or not is_valid_win(state.win) then
       return
     end
-    vim.fn.chansend(state.job, input .. '\n')
+
+    local previous_win = vim.api.nvim_get_current_win()
+    vim.api.nvim_set_current_win(state.win)
+    vim.cmd('startinsert')
+
+    local keys = vim.api.nvim_replace_termcodes(input, true, false, true)
+    vim.api.nvim_input(keys)
+    vim.api.nvim_input('\r')
+
+    if vim.api.nvim_win_is_valid(previous_win) then
+      vim.api.nvim_set_current_win(previous_win)
+    end
   end
 
-  if state.job and state.job > 0 then
+  if state.job and state.job > 0 and is_valid_win(state.win) then
     do_send()
   else
     M.open()

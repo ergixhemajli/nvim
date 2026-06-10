@@ -25,6 +25,25 @@ vim.o.autoread = true
 
 vim.cmd [[set completeopt+=menuone,noselect,popup]]
 
+-- Reload files changed outside of Neovim (e.g. external tools/agents)
+local autoreload_group = vim.api.nvim_create_augroup('auto-reload-external-changes', { clear = true })
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
+	group = autoreload_group,
+	pattern = '*',
+	callback = function()
+		if vim.fn.mode() ~= 'c' then
+			vim.cmd('checktime')
+		end
+	end,
+})
+vim.api.nvim_create_autocmd('FileChangedShellPost', {
+	group = autoreload_group,
+	pattern = '*',
+	callback = function()
+		vim.notify('File changed on disk. Buffer reloaded.', vim.log.levels.INFO)
+	end,
+})
+
 vim.api.nvim_create_autocmd('TextYankPost', {
 	desc = 'Highlight when yanking (copying) text',
 	group = vim.api.nvim_create_augroup('highlight-yank', { clear = true }),
