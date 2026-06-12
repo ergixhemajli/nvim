@@ -1,4 +1,12 @@
 require('mason').setup()
+require('mason-tool-installer').setup({
+    ensure_installed = {
+        'tailwindcss-language-server',
+    },
+    auto_update = false,
+    run_on_start = true,
+    start_delay = 3000,
+})
 require('oil').setup()
 require('telescope').setup()
 require('which-key').setup({

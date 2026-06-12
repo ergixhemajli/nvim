@@ -4,6 +4,7 @@ local state = {
   buf = nil,
   win = nil,
   job = nil,
+  pending = {},
 }
 
 local function close_window_only()
@@ -25,6 +26,34 @@ local function clear_state()
   state.buf = nil
   state.win = nil
   state.job = nil
+  state.pending = {}
+end
+
+local function is_running_job()
+  if not state.job or state.job <= 0 then
+    return false
+  end
+
+  local ok, status = pcall(vim.fn.jobwait, { state.job }, 0)
+  return ok and status and status[1] == -1
+end
+
+local function flush_pending()
+  if not is_running_job() then
+    return false
+  end
+
+  if #state.pending == 0 then
+    return true
+  end
+
+  for _, input in ipairs(state.pending) do
+    vim.fn.chansend(state.job, input)
+    vim.fn.chansend(state.job, '\n')
+  end
+
+  state.pending = {}
+  return true
 end
 
 local function selection_kind()
@@ -291,18 +320,17 @@ end
 function M.open()
   if is_valid_win(state.win) then
     vim.api.nvim_set_current_win(state.win)
-    vim.cmd('startinsert')
     return
   end
 
-  if is_valid_buf(state.buf) and state.job then
+  if is_valid_buf(state.buf) and is_running_job() then
     local previous_win = vim.api.nvim_get_current_win()
     vim.cmd('vsplit')
     state.win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_buf(state.win, state.buf)
     vim.api.nvim_win_set_width(state.win, math.floor(vim.o.columns * 0.35))
-    vim.cmd('startinsert')
     vim.api.nvim_set_current_win(previous_win)
+    flush_pending()
     return
   end
 
@@ -313,29 +341,13 @@ function M.open()
 
   local previous_win = vim.api.nvim_get_current_win()
   state.buf = vim.api.nvim_create_buf(false, false)
-  vim.bo[state.buf].bufhidden = 'wipe'
+  vim.bo[state.buf].bufhidden = 'hide'
   vim.bo[state.buf].filetype = 'pi'
 
   vim.cmd('vnew')
   state.win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_buf(state.win, state.buf)
   vim.api.nvim_win_set_width(state.win, math.floor(vim.o.columns * 0.35))
-
-  local redraw_auid
-  redraw_auid = vim.api.nvim_create_autocmd('TermRequest', {
-    buffer = state.buf,
-    callback = function(ev)
-      if ev.data.cursor[1] > 1 and is_valid_win(state.win) then
-        vim.api.nvim_del_autocmd(redraw_auid)
-        local current_win = vim.api.nvim_get_current_win()
-        vim.api.nvim_set_current_win(state.win)
-        vim.cmd([[startinsert | call feedkeys("\<C-\\>\<C-n>\<C-w>p", "n")]])
-        if vim.api.nvim_win_is_valid(current_win) then
-          vim.api.nvim_set_current_win(current_win)
-        end
-      end
-    end,
-  })
 
   state.job = vim.fn.jobstart('pi', {
     term = true,
@@ -347,6 +359,7 @@ function M.open()
   })
 
   vim.api.nvim_set_current_win(previous_win)
+  vim.defer_fn(flush_pending, 200)
 end
 
 function M.close()
@@ -361,8 +374,8 @@ function M.close()
 end
 
 function M.toggle()
-  if is_valid_win(state.win) and is_valid_buf(state.buf) and state.job then
-    M.close()
+  if is_valid_win(state.win) then
+    close_window_only()
   else
     M.open()
   end
@@ -376,7 +389,7 @@ function M.focus()
 end
 
 function M.has_open()
-  return is_valid_win(state.win) and is_valid_buf(state.buf) and state.job
+  return is_valid_win(state.win) and is_valid_buf(state.buf) and is_running_job()
 end
 
 function M.send_input(input)
@@ -384,30 +397,26 @@ function M.send_input(input)
     return
   end
 
-  local function do_send()
-    if not state.job or state.job <= 0 or not is_valid_win(state.win) then
+  table.insert(state.pending, input)
+
+  if flush_pending() then
+    return
+  end
+
+  M.open()
+
+  local attempts = 0
+  local function try_flush()
+    attempts = attempts + 1
+    if flush_pending() then
       return
     end
-
-    local previous_win = vim.api.nvim_get_current_win()
-    vim.api.nvim_set_current_win(state.win)
-    vim.cmd('startinsert')
-
-    local keys = vim.api.nvim_replace_termcodes(input, true, false, true)
-    vim.api.nvim_input(keys)
-    vim.api.nvim_input('\r')
-
-    if vim.api.nvim_win_is_valid(previous_win) then
-      vim.api.nvim_set_current_win(previous_win)
+    if attempts < 40 then
+      vim.defer_fn(try_flush, 100)
     end
   end
 
-  if state.job and state.job > 0 and is_valid_win(state.win) then
-    do_send()
-  else
-    M.open()
-    vim.defer_fn(do_send, 150)
-  end
+  vim.defer_fn(try_flush, 100)
 end
 
 function M.ask_input(opts)
@@ -416,7 +425,7 @@ function M.ask_input(opts)
   local values = current_context(selection)
 
   vim.ui.input({
-    prompt = 'pi: ',
+    prompt = 'ask pi: ',
     completion = 'customlist,v:lua.pi_context_completion',
   }, function(input)
     if not input or #input == 0 then
@@ -437,6 +446,9 @@ end
 
 function M.ask_with_visual_selection()
   local selection = get_visual_selection_data()
+  local esc = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
+  -- Exit visual mode and immediately show prompt
+  vim.api.nvim_feedkeys(esc, 'nx', false)
   M.ask_input({ selection = selection })
 end
 

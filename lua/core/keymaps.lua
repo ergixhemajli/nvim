@@ -53,9 +53,13 @@ keymap('n', '<leader>gc', ':DiffviewClose<CR>', { desc = 'Close diff' })
 
 -- Pi keymaps
 keymap('n', '<C-a>', function() require('plugins.pi').ask_input() end, { desc = 'Ask pi' })
+keymap('i', '<C-a>', function()
+  vim.cmd('stopinsert')
+  require('plugins.pi').ask_input()
+end, { desc = 'Ask pi' })
 keymap('x', '<C-a>', function() require('plugins.pi').ask_with_visual_selection() end, { desc = 'Ask pi with selection' })
 keymap('x', '<C-x>', function() require('plugins.pi').send_visual_selection() end, { desc = 'Send selection to pi' })
-keymap({ 'n', 't' }, '<C-.>', '<cmd>PiToggle<CR>', { desc = 'Toggle pi' })
+keymap({ 'n', 't' }, '<C-.>', function() require('plugins.pi').toggle() end, { desc = 'Toggle pi' })
 
 -- Exit terminal mode (does NOT interrupt pi)
 keymap('t', '<Esc>', function()

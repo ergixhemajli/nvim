@@ -1,5 +1,16 @@
 local lsp = vim.lsp
 
+local function setup(server, opts)
+	if opts then
+		lsp.config(server, opts)
+	end
+	lsp.enable(server)
+end
+
+-- Add new servers with one of these:
+--   setup('bashls')
+--   setup('yamlls', { settings = { yaml = { keyOrdering = false } } })
+
 -- LSP completion setup on attach
 vim.api.nvim_create_autocmd('LspAttach', {
 	group = vim.api.nvim_create_augroup('my.lsp', {}),
@@ -17,16 +28,42 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- lua-language-server
-lsp.enable('lua_ls')
+setup('lua_ls')
 
 -- clangd (C/C++)
-lsp.enable('clangd')
+setup('clangd')
 
 -- TypeScript
-lsp.enable('ts_ls')
+setup('ts_ls')
+
+-- Tailwind CSS
+setup('tailwindcss', {
+	filetypes = {
+		'html',
+		'css',
+		'scss',
+		'javascript',
+		'javascriptreact',
+		'typescript',
+		'typescriptreact',
+		'vue',
+		'svelte',
+		'astro',
+	},
+	root_markers = {
+		'tailwind.config.js',
+		'tailwind.config.cjs',
+		'tailwind.config.mjs',
+		'tailwind.config.ts',
+		'postcss.config.js',
+		'postcss.config.cjs',
+		'package.json',
+		'.git',
+	},
+})
 
 -- JSON
-lsp.config('jsonls', {
+setup('jsonls', {
 	filetypes = { 'json', 'jsonc' },
 	root_markers = { '.git', 'package.json' },
 	settings = {
@@ -37,24 +74,22 @@ lsp.config('jsonls', {
 		},
 	},
 })
-lsp.enable('jsonls')
 
 -- Kotlin
-lsp.config('kotlin_lsp', {
-	-- use faketime to fix the expired kotlin-lsp server binary from intellij
+setup('kotlin_lsp', {
 	cmd = { 'kotlin-lsp', '--stdio' },
-	--cmd = { "faketime", "2026-06-04", "kotlin-lsp", "--stdio" },
 	filetypes = { 'kotlin' },
+	single_file_support = true,
 	root_markers = {
 		'settings.gradle',
 		'settings.gradle.kts',
 		'pom.xml',
 		'build.gradle',
 		'build.gradle.kts',
+		'gradle.properties',
+		'gradlew',
+		'mvnw',
 		'workspace.json',
+		'.git', -- fallback so LSP also starts in monorepos/single-module trees
 	},
-	on_attach = function(_, bufnr)
-		vim.diagnostic.enable(false, { bufnr = bufnr })
-	end,
 })
-lsp.enable('kotlin_lsp')
