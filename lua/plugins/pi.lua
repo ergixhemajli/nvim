@@ -337,7 +337,10 @@ function M.open()
   if is_valid_buf(state.buf) then
     vim.api.nvim_buf_delete(state.buf, { force = true })
   end
-  clear_state()
+  -- Keep pending messages queued when opening a fresh Pi instance.
+  state.buf = nil
+  state.win = nil
+  state.job = nil
 
   local previous_win = vim.api.nvim_get_current_win()
   state.buf = vim.api.nvim_create_buf(false, false)
