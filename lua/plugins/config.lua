@@ -1,12 +1,4 @@
 require('mason').setup()
-require('mason-tool-installer').setup({
-    ensure_installed = {
-        'tailwindcss-language-server',
-    },
-    auto_update = false,
-    run_on_start = true,
-    start_delay = 3000,
-})
 require('oil').setup()
 require('telescope').setup()
 require('which-key').setup({
@@ -115,3 +107,21 @@ vim.g.copilot_filetypes = {
     zsh = false,
     env = false,
 }
+
+-- nvim-highlight-colors: foreground highlight on color values
+vim.schedule(function()
+    local ok, hl = pcall(require, 'nvim-highlight-colors')
+    if ok then
+        hl.setup({
+            render = 'background',
+            enable_hex = true,
+            enable_short_hex = true,
+            enable_rgb = true,
+            enable_hsl = true,
+            enable_hsl_without_function = true,
+            enable_var_usage = true,
+            enable_named_colors = true,
+            enable_tailwind = true,
+        })
+    end
+end)

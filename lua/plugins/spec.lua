@@ -16,4 +16,5 @@ return {
     { src = 'https://github.com/github/copilot.vim' },
     { src = 'https://github.com/sindrets/diffview.nvim' },
     { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
+    { src = 'https://github.com/brenoprata10/nvim-highlight-colors' },
 }

@@ -14,11 +14,9 @@ keymap('n', '<C-j>', '<C-w>j', { desc = 'Move focus down' })
 keymap('n', '<C-k>', '<C-w>k', { desc = 'Move focus up' })
 keymap('n', '<C-w>', ':close<CR>', { desc = 'Close current window' })
 
--- Splits
-keymap('n', '<leader>v', ':vsplit<CR>', { desc = 'Vertical split' })
-keymap('n', '<leader>|', ':vsplit<CR>', { desc = 'Vertical split' })
-keymap('n', '<leader>h', ':split<CR>', { desc = 'Horizontal split' })
-keymap('n', '<leader>s', ':split<CR>', { desc = 'Horizontal split' })
+-- Splits (Ctrl-based only)
+keymap('n', '<C-s>', ':split<CR>', { desc = 'Horizontal split' })
+keymap('n', '<C-v>', ':vsplit<CR>', { desc = 'Vertical split' })
 
 -- Toggle terminal mode with Ctrl-Hjkl
 keymap('t', '<C-h>', '<C-\\><C-n><C-w>h', { desc = 'Terminal: switch to left window' })
@@ -50,6 +48,7 @@ keymap('n', '<leader>sr', ':GrugFar<CR>', { desc = 'Search/Replace' })
 keymap('n', '<leader>gd', ':DiffviewOpen<CR>', { desc = 'Git diff' })
 keymap('n', '<leader>gh', ':DiffviewFileHistory %<CR>', { desc = 'File git history' })
 keymap('n', '<leader>gc', ':DiffviewClose<CR>', { desc = 'Close diff' })
+keymap('n', '<leader>oc', ':!code -g %:p<CR>', { desc = 'Open current file in VS Code' })
 
 -- Pi keymaps
 keymap('n', '<C-a>', function() require('plugins.pi').ask_input() end, { desc = 'Ask pi' })

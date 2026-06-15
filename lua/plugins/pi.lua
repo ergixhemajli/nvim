@@ -448,10 +448,11 @@ function M.ask_input(opts)
 end
 
 function M.ask_with_visual_selection()
+  -- Capture selection BEFORE exiting visual mode (marks are cleared by <Esc>).
+  local selection = get_visual_selection_data()
   local esc = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
   vim.api.nvim_feedkeys(esc, 'nx', false)
   vim.schedule(function()
-    local selection = get_visual_selection_data()
     M.ask_input({ selection = selection })
   end)
 end
