@@ -9,7 +9,8 @@ vim.pack.add(require('plugins.spec'))
 require('plugins.config')
 
 -- Custom plugins
-require('plugins.pi')  -- AI terminal agent (Ctrl+.)
+require('plugins.pi')
+require('plugins.md-render')
 
 -- LSP
 require('lsp.config')

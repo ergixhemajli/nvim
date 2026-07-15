@@ -1,2 +1,0 @@
--- Kotlin uses kotlin_lsp, not jdtls. This ftplugin is no longer needed.
--- LSP is configured in lua/lsp/config.lua

@@ -40,7 +40,7 @@ keymap('n', '<leader>lf', vim.lsp.buf.format, { desc = 'LSP format' })
 
 -- Plugin keymaps
 keymap('n', '<leader>e', ':Oil<CR>', { desc = 'Oil file explorer' })
-keymap('n', '<leader>m', ':Mason<CR>', { desc = 'Mason' })
+keymap('n', '<leader>mc', ':Mason<CR>', { desc = 'Mason' })
 keymap('n', '<leader>ff', ':Telescope find_files<CR>', { desc = 'Find files' })
 keymap('n', '<leader>fg', ':Telescope live_grep<CR>', { desc = 'Grep' })
 keymap('n', '<leader>fb', ':Telescope buffers<CR>', { desc = 'Buffers' })
