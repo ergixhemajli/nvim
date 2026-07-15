@@ -1,5 +1,13 @@
 require('mason').setup()
-require('oil').setup()
+require("oil").setup({
+  keymaps = {
+    -- Disable the oil keymaps that conflict with split navigation
+    ["<C-h>"] = false, 
+    ["<C-l>"] = false,
+    ["<C-k>"] = false,
+    ["<C-j>"] = false,
+  },
+})
 require('telescope').setup()
 require('which-key').setup({
   triggers = {

@@ -58,9 +58,20 @@ end
 
 local function selection_kind()
   local mode = vim.fn.mode(1)
-  if mode == 'v' or mode == 'V' or mode == '\22' then
-    return mode
+  local head = mode:sub(1, 1)
+
+  -- Visual mode (v/V/^V) and Select mode (s/S/^S)
+  if head == 'v' or head == 'V' or head == '\22' then
+    return head
   end
+  if head == 's' then
+    return 'v'
+  elseif head == 'S' then
+    return 'V'
+  elseif head == '\19' then
+    return '\22'
+  end
+
   local last = vim.fn.visualmode()
   if last == 'v' or last == 'V' or last == '\22' then
     return last
@@ -70,14 +81,25 @@ end
 
 local function get_visual_selection_data()
   local bufnr = vim.api.nvim_get_current_buf()
-  local start = vim.fn.getpos("'<")
-  local finish = vim.fn.getpos("'>")
+  local kind = selection_kind()
+
+  -- In active visual mode, use the live range (v + .).
+  -- '< and '> can lag/stale until visual mode exits.
+  local start, finish
+  if kind then
+    start = vim.fn.getpos('v')
+    finish = vim.fn.getpos('.')
+  else
+    start = vim.fn.getpos("'<")
+    finish = vim.fn.getpos("'>")
+    kind = vim.fn.visualmode()
+  end
 
   if start[2] == 0 or finish[2] == 0 then
     return nil
   end
 
-  local kind = selection_kind() or 'v'
+  kind = kind or 'v'
   local srow, scol = start[2], start[3] - 1
   local erow, ecol = finish[2], finish[3] - 1
 
