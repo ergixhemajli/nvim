@@ -20,25 +20,25 @@ This gives identical functionality with smallest behavior risk and no leftover o
 
 ## Affected Files
 1. `init.lua`
-   - `require('plugins.pi')` -> `require('plugins.claude')`
+   - `require('plugins.previous_agent')` -> `require('plugins.claude')`
 
-2. `lua/plugins/pi.lua` -> `lua/plugins/claude.lua`
+2. `lua/plugins/previous-agent.lua` -> `lua/plugins/claude.lua`
    - Rename file.
    - Keep logic same.
    - Update all user-facing/internal identifiers:
-     - `_G.pi_context_completion` -> `_G.claude_context_completion`
+     - `_G.previous_agent_context_completion` -> `_G.claude_context_completion`
      - input completion binding string to new global symbol
      - prompt text `ask ...` to Claude wording
      - filetype label to `claude`
      - terminal job command: `jobstart('claude', ...)`
      - user commands:
-       - `PiToggle` -> `ClaudeToggle`
-       - `PiClose` -> `ClaudeClose`
-       - `PiFocus` -> `ClaudeFocus`
+       - `PreviousToggle` -> `ClaudeToggle`
+       - `PreviousClose` -> `ClaudeClose`
+       - `PreviousFocus` -> `ClaudeFocus`
      - comments and strings using old naming -> Claude naming
 
 3. `lua/core/keymaps.lua`
-   - Require path `plugins.pi` -> `plugins.claude`
+   - Require path `plugins.previous_agent` -> `plugins.claude`
    - Update keymap descriptions/comments to Claude naming
    - Keep key combos and functional behavior unchanged:
      - `<C-a>` normal/insert ask flow
