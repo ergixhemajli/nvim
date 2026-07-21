@@ -323,7 +323,7 @@ local CONTEXT_PLACEHOLDERS = {
 }
 
 -- Completion for vim.ui.input via :help input()-completion
-_G.pi_context_completion = function(_, cmdline)
+_G.claude_context_completion = function(_, cmdline)
   local start_idx, end_idx = cmdline:find('([^%s]+)$')
   local latest = start_idx and cmdline:sub(start_idx, end_idx) or nil
 
@@ -359,7 +359,7 @@ function M.open()
   if is_valid_buf(state.buf) then
     vim.api.nvim_buf_delete(state.buf, { force = true })
   end
-  -- Keep pending messages queued when opening a fresh Pi instance.
+  -- Keep pending messages queued when opening a fresh Claude instance.
   state.buf = nil
   state.win = nil
   state.job = nil
@@ -367,14 +367,14 @@ function M.open()
   local previous_win = vim.api.nvim_get_current_win()
   state.buf = vim.api.nvim_create_buf(false, false)
   vim.bo[state.buf].bufhidden = 'hide'
-  vim.bo[state.buf].filetype = 'pi'
+  vim.bo[state.buf].filetype = 'claude'
 
   vim.cmd('vnew')
   state.win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_buf(state.win, state.buf)
   vim.api.nvim_win_set_width(state.win, math.floor(vim.o.columns * 0.35))
 
-  state.job = vim.fn.jobstart('pi', {
+  state.job = vim.fn.jobstart('claude', {
     term = true,
     on_exit = function()
       vim.schedule(function()
@@ -450,8 +450,8 @@ function M.ask_input(opts)
   local values = current_context(selection)
 
   vim.ui.input({
-    prompt = 'ask pi: ',
-    completion = 'customlist,v:lua.pi_context_completion',
+    prompt = 'ask claude:',
+    completion = 'customlist,v:lua.claude_context_completion',
   }, function(input)
     if not input or #input == 0 then
       return
@@ -499,16 +499,16 @@ function M.get_state()
   return state
 end
 
-vim.api.nvim_create_user_command('PiToggle', function()
-  require('plugins.pi').toggle()
+vim.api.nvim_create_user_command('ClaudeToggle', function()
+  require('plugins.claude').toggle()
 end, {})
 
-vim.api.nvim_create_user_command('PiClose', function()
-  require('plugins.pi').close()
+vim.api.nvim_create_user_command('ClaudeClose', function()
+  require('plugins.claude').close()
 end, {})
 
-vim.api.nvim_create_user_command('PiFocus', function()
-  require('plugins.pi').focus()
+vim.api.nvim_create_user_command('ClaudeFocus', function()
+  require('plugins.claude').focus()
 end, {})
 
 return M
