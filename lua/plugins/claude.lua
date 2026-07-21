@@ -56,6 +56,20 @@ local function flush_pending()
   return true
 end
 
+local function claude_command()
+  local model_lines = vim.fn.systemlist('lmx ps name')
+  if vim.v.shell_error ~= 0 or not model_lines or #model_lines == 0 then
+    return { 'claude' }
+  end
+
+  local model = vim.trim(model_lines[1] or '')
+  if model == '' then
+    return { 'claude' }
+  end
+
+  return { 'claude', '--model', model }
+end
+
 local function selection_kind()
   local mode = vim.fn.mode(1)
   local head = mode:sub(1, 1)
@@ -374,7 +388,7 @@ function M.open()
   vim.api.nvim_win_set_buf(state.win, state.buf)
   vim.api.nvim_win_set_width(state.win, math.floor(vim.o.columns * 0.35))
 
-  state.job = vim.fn.jobstart('claude', {
+  state.job = vim.fn.jobstart(claude_command(), {
     term = true,
     on_exit = function()
       vim.schedule(function()
