@@ -59,12 +59,74 @@ end, { desc = 'Ask claude' })
 keymap('x', '<C-a>', function() require('plugins.claude').ask_with_visual_selection() end, { desc = 'Ask claude with selection' })
 keymap('x', '<C-x>', function() require('plugins.claude').send_visual_selection() end, { desc = 'Send selection to claude' })
 keymap({ 'n', 't' }, '<C-.>', function() require('plugins.claude').toggle() end, { desc = 'Toggle claude' })
-
--- Exit terminal mode (does NOT interrupt claude)
-keymap('t', '<Esc>', function()
+keymap('t', '<Esc>', function() -- Exit terminal mode (does NOT interrupt claude)
   vim.api.nvim_input('<C-\\><C-n>')
 end, { desc = 'Exit terminal mode' })
--- Interrupt claude (or any foreground terminal process)
-keymap('t', '<C-c>', function()
+keymap('t', '<C-c>', function() -- Interrupt claude (or any foreground terminal process)
   vim.api.nvim_input('\x03')
 end, { desc = 'Interrupt terminal process' })
+
+-- Sudo write
+local function parse_url(bufname)
+  local userhost, path = bufname:match('^oil%-ssh://([^/]+)/(/.+)$')
+  return userhost, path
+end
+
+vim.api.nvim_create_user_command('SudoWrite', function()
+  local bufname = vim.api.nvim_buf_get_name(0)
+  local host, remote_path = parse_url(bufname)
+  if not host then
+    vim.notify('Not a recognized oil-ssh buffer: ' .. bufname, vim.log.levels.ERROR)
+    return
+  end
+
+  local tmp_local = vim.fn.tempname()
+  vim.cmd('write! ' .. tmp_local)
+
+  local tmp_remote = '/tmp/nvim_sudowrite_' .. vim.fn.fnamemodify(tmp_local, ':t')
+
+  -- upload to a scratch path first (no sudo needed, normal user perms on /tmp)
+  vim.fn.system({ 'scp', tmp_local, host .. ':' .. tmp_remote })
+  if vim.v.shell_error ~= 0 then
+    vim.notify('scp upload failed', vim.log.levels.ERROR)
+    vim.fn.delete(tmp_local)
+    return
+  end
+
+  -- floating terminal for the interactive sudo password prompt
+  local w, h = vim.o.columns, vim.o.lines
+  local ww, wh = 60, 6
+  local win = vim.api.nvim_open_win(vim.api.nvim_create_buf(false, true), true, {
+    relative = 'editor',
+    style = 'minimal',
+    border = 'single',
+    width = ww,
+    height = wh,
+    col = math.floor((w - ww) / 2),
+    row = math.floor((h - wh) / 2),
+  })
+
+  local remote_cmd = string.format(
+    'sudo cp %s %s && sudo rm -f %s',
+    vim.fn.shellescape(tmp_remote),
+    vim.fn.shellescape(remote_path),
+    vim.fn.shellescape(tmp_remote)
+  )
+
+  vim.fn.jobstart({ 'ssh', '-t', host, remote_cmd }, {
+    term = true,
+    on_exit = function(_, code)
+      vim.fn.delete(tmp_local)
+      if vim.api.nvim_win_is_valid(win) then
+        vim.api.nvim_win_close(win, true)
+      end
+      if code == 0 then
+        vim.cmd('checktime')
+        vim.notify('Sudo write succeeded', vim.log.levels.INFO)
+      else
+        vim.notify('Sudo write failed (exit ' .. code .. ')', vim.log.levels.ERROR)
+      end
+    end,
+  })
+  vim.cmd('startinsert')
+end, { desc = 'Sudo write current oil-ssh buffer to remote host' })

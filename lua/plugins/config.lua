@@ -1,20 +1,42 @@
 require('mason').setup()
-require("oil").setup({
-  keymaps = {
-    -- Disable the oil keymaps that conflict with split navigation
-    ["<C-h>"] = false, 
-    ["<C-l>"] = false,
-    ["<C-k>"] = false,
-    ["<C-j>"] = false,
-  },
+
+local oil = require("oil")
+local actions = require("oil.actions")
+
+oil.setup({
+	keymaps = {
+		["<C-h>"] = false,
+		["<C-l>"] = false,
+		["<C-k>"] = false,
+		["<C-j>"] = false,
+		["_"] = function()
+			local name = vim.api.nvim_buf_get_name(0) -- strongest signal
+			local host = name:match("^(oil%-ssh://[^/]+)")
+
+			if not host then
+				local dir = oil.get_current_dir()       -- fallback
+				host = dir and dir:match("^(oil%-ssh://[^/]+)")
+			end
+
+			if host then
+				oil.open(host .. "/")                   -- remote root
+			else
+				actions.open_cwd.callback()             -- local behavior
+			end
+		end,
+	},
 })
+
 require('telescope').setup()
+
 require('which-key').setup({
   triggers = {
     { '<Space>', mode = 'nxso' },
   },
 })
+
 require('grug-far').setup()
+
 require('diffview').setup()
 
 require('conform').setup({
