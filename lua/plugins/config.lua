@@ -1,7 +1,6 @@
 require('mason').setup()
 
 local oil = require("oil")
-local actions = require("oil.actions")
 
 oil.setup({
 	keymaps = {
@@ -9,22 +8,24 @@ oil.setup({
 		["<C-l>"] = false,
 		["<C-k>"] = false,
 		["<C-j>"] = false,
-		["_"] = function()
-			local name = vim.api.nvim_buf_get_name(0) -- strongest signal
-			local host = name:match("^(oil%-ssh://[^/]+)")
-
-			if not host then
-				local dir = oil.get_current_dir()       -- fallback
-				host = dir and dir:match("^(oil%-ssh://[^/]+)")
-			end
-
-			if host then
-				oil.open(host .. "/")                   -- remote root
-			else
-				actions.open_cwd.callback()             -- local behavior
-			end
-		end,
 	},
+	view_options = {},
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "oil",
+	callback = function()
+		local dir = oil.get_current_dir()
+		if not dir then
+			return
+		end
+		local git_roots = vim.fs.find(".git", { path = dir, upward = true, type = "directory" })
+		if #git_roots == 0 then
+			oil.set_sort({ { "mtime", "desc" } })
+		else
+			oil.set_sort({})
+		end
+	end,
 })
 
 require('telescope').setup()
@@ -84,6 +85,11 @@ vim.schedule(function()
             enable_var_usage = true,
             enable_named_colors = true,
             enable_tailwind = true,
+
+						exclude_buffer = function(bufnr)
+            local name = vim.api.nvim_buf_get_name(bufnr)
+            return name:match("%.zshrc$") ~= nil
+        end,
         })
     end
 end)

@@ -77,7 +77,7 @@ setup('jsonls', {
 
 -- Kotlin
 setup('kotlin_lsp', {
-	cmd = { 'kotlin-lsp', '--stdio' },
+	cmd = { 'intellij-server', '--stdio' },
 	filetypes = { 'kotlin' },
 	single_file_support = true,
 	root_markers = {

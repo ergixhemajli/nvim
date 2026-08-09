@@ -1,16 +1,23 @@
+-- Fix PATH when launched from GUI (macOS), so Mason finds npm/node
+if vim.fn.executable('npm') == 0 then
+	local path = vim.fn.system('zsh -lc "echo $PATH"'):gsub('%s+$', '')
+	if path ~= '' then
+		vim.env.PATH = path .. ':' .. (vim.env.PATH or '')
+	end
+end
+
 -- Core
 require('core.options')
 require('core.keymaps')
 
--- Plugin manager (Neovim 0.12+ vim.pack)
--- External plugins: see lua/plugins/spec.lua
--- Custom modules: require() these explicitly
+-- Plugins
 vim.pack.add(require('plugins.spec'))
 require('plugins.config')
 
 -- Custom plugins
 require('plugins.claude')
 require('plugins.md-render')
+require('plugins.sudo-oil')
 
 -- LSP
 require('lsp.config')

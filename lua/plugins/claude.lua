@@ -464,7 +464,7 @@ function M.ask_input(opts)
   local values = current_context(selection)
 
   vim.ui.input({
-    prompt = 'ask claude:',
+    prompt = 'ask claude: ',
     completion = 'customlist,v:lua.claude_context_completion',
   }, function(input)
     if not input or #input == 0 then

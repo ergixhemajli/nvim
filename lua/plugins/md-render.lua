@@ -2,19 +2,17 @@ local function render_markdown_with_glow()
   local tempfile = vim.fn.tempname() .. ".md"
   vim.cmd("write! " .. tempfile)
 
-  vim.cmd("enew")
+  -- open new tab so preview fills full window
+  vim.cmd("tabnew")
+  vim.cmd("terminal glow -p " .. vim.fn.fnameescape(tempfile))
   local bufnr = vim.api.nvim_get_current_buf()
-
-  local command = "terminal glow -p " .. tempfile
-
-  vim.cmd(command)
 
   vim.cmd("startinsert!")
 
   vim.api.nvim_create_autocmd("TermClose", {
     buffer = bufnr,
     callback = function()
-			vim.uv.fs_unlink(tempfile)
+      pcall(vim.loop.fs_unlink, tempfile)
       pcall(vim.api.nvim_buf_delete, bufnr, { force = true })
     end,
   })
