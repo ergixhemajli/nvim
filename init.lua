@@ -16,7 +16,6 @@ require('plugins.config')
 
 -- Custom plugins
 require('plugins.claude')
-require('plugins.md-render')
 require('plugins.sudo-oil')
 
 -- LSP

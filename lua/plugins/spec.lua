@@ -16,4 +16,5 @@ return {
     { src = 'https://github.com/sindrets/diffview.nvim' },
     { src = 'https://github.com/nvim-tree/nvim-web-devicons' },
     { src = 'https://github.com/brenoprata10/nvim-highlight-colors' },
+    { src = 'https://github.com/MeanderingProgrammer/render-markdown.nvim', opts = {} },
 }
