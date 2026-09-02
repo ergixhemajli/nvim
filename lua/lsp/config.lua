@@ -77,19 +77,12 @@ setup('jsonls', {
 
 -- Kotlin
 setup('kotlin_lsp', {
-	cmd = { 'intellij-server', '--stdio' },
+	cmd = { vim.fn.expand('~/.local/share/nvim/mason/bin/intellij-server'), '--stdio' },
 	filetypes = { 'kotlin' },
-	single_file_support = true,
-	root_markers = {
-		'settings.gradle',
-		'settings.gradle.kts',
-		'pom.xml',
-		'build.gradle',
-		'build.gradle.kts',
-		'gradle.properties',
-		'gradlew',
-		'mvnw',
-		'workspace.json',
-		'.git', -- fallback so LSP also starts in monorepos/single-module trees
-	},
+	single_file_support = false,
+	root_dir = function(bufnr, on_dir)
+		local fname = vim.api.nvim_buf_get_name(bufnr)
+		local git = vim.fs.find('.git', { path = fname, upward = true })[1]
+		on_dir(git and vim.fs.dirname(git) or vim.fs.dirname(fname))
+	end,
 })

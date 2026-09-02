@@ -42,7 +42,7 @@ require('diffview').setup()
 
 require('conform').setup({
     formatters_by_ft = {
-        kotlin = { 'ktfmt', 'ktlint' },
+        kotlin = { 'ktfmt' },
         java = { 'google-java-format' },
         json = { 'jsonlint' },
         javascript = { 'prettierd' },
@@ -62,10 +62,11 @@ require('conform').setup({
     },
     format_on_save = {
         lsp_fallback = true,
-        timeout_ms = 500,
+        timeout_ms = 5000,
     },
 })
 
+vim.g.copilot_npx = false
 vim.g.copilot_filetypes = {
     zsh = false,
     env = false,
