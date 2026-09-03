@@ -62,3 +62,9 @@ vim.api.nvim_create_user_command('ReloadConfig', function()
 	dofile(vim.fn.expand('$MYVIMRC'))
 	vim.notify('Config reloaded', vim.log.levels.INFO, { title = 'nvim' })
 end, { desc = 'Reload Neovim config' })
+
+-- preformat json with jq
+vim.api.nvim_create_autocmd({"BufReadPost", "BufWritePost"}, {
+  pattern = "*.json",
+  command = ":%!jq ."
+})
