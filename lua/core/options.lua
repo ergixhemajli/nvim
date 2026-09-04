@@ -1,5 +1,5 @@
 vim.g.mapleader = ' '
-vim.g.mapLocalLeader = ' '
+vim.g.maplocalleader = ','
 vim.g.have_nerd_font = true
 
 vim.schedule(function()
