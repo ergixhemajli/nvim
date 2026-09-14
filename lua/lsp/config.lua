@@ -77,7 +77,8 @@ setup('jsonls', {
 
 -- Kotlin
 setup('kotlin_lsp', {
-	cmd = { vim.fn.expand('~/.local/share/nvim/mason/bin/intellij-server'), '--stdio' },
+	-- cmd = { vim.fn.expand('~/.local/share/nvim/mason/bin/intellij-server'), '--stdio' },
+	--cmd = { vim.fn.expand('kotlin-lsp'), '--stdio' },
 	filetypes = { 'kotlin' },
 	single_file_support = false,
 	root_dir = function(bufnr, on_dir)
