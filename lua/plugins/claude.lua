@@ -56,18 +56,33 @@ local function flush_pending()
   return true
 end
 
-local function claude_command()
+local function claude_env()
+  local env = {
+    ANTHROPIC_AUTH_TOKEN = 'llama',
+    ANTHROPIC_BASE_URL = 'http://localhost:11434',
+    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1',
+  }
+
   local model_lines = vim.fn.systemlist('lmx ps name')
-  if vim.v.shell_error ~= 0 or not model_lines or #model_lines == 0 then
-    return { 'claude' }
+  local model = ''
+  if vim.v.shell_error == 0 and model_lines and #model_lines > 0 then
+    model = vim.trim(model_lines[1] or '')
   end
 
-  local model = vim.trim(model_lines[1] or '')
-  if model == '' then
-    return { 'claude' }
+  if model ~= '' then
+    env.CLAUDE_CODE_SUBAGENT_MODEL = model
   end
 
-  return { 'claude', '--model', model }
+  return env, model
+end
+
+local function claude_command(model)
+  local cmd = { 'claude', '--dangerously-skip-permissions' }
+  if model and model ~= '' then
+    table.insert(cmd, '--model')
+    table.insert(cmd, model)
+  end
+  return cmd
 end
 
 local function selection_kind()
@@ -388,8 +403,10 @@ function M.open()
   vim.api.nvim_win_set_buf(state.win, state.buf)
   vim.api.nvim_win_set_width(state.win, math.floor(vim.o.columns * 0.35))
 
-  state.job = vim.fn.jobstart(claude_command(), {
+  local env, model = claude_env()
+  state.job = vim.fn.jobstart(claude_command(model), {
     term = true,
+    env = env,
     on_exit = function()
       vim.schedule(function()
         M.close()
