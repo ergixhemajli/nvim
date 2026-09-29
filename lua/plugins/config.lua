@@ -57,8 +57,6 @@ require('grug-far').setup()
 
 require('diffview').setup()
 
-require('stay-centered').setup()
-
 require('conform').setup({
     formatters_by_ft = {
         kotlin = { 'ktfmt' },

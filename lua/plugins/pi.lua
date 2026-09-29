@@ -56,35 +56,6 @@ local function flush_pending()
   return true
 end
 
-local function claude_env()
-  local env = {
-    ANTHROPIC_AUTH_TOKEN = 'llama',
-    ANTHROPIC_BASE_URL = 'http://localhost:11434',
-    CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1',
-  }
-
-  local model_lines = vim.fn.systemlist('lmx ps name')
-  local model = ''
-  if vim.v.shell_error == 0 and model_lines and #model_lines > 0 then
-    model = vim.trim(model_lines[1] or '')
-  end
-
-  if model ~= '' then
-    env.CLAUDE_CODE_SUBAGENT_MODEL = model
-  end
-
-  return env, model
-end
-
-local function claude_command(model)
-  local cmd = { 'claude', '--dangerously-skip-permissions' }
-  if model and model ~= '' then
-    table.insert(cmd, '--model')
-    table.insert(cmd, model)
-  end
-  return cmd
-end
-
 local function selection_kind()
   local mode = vim.fn.mode(1)
   local head = mode:sub(1, 1)
@@ -352,7 +323,7 @@ local CONTEXT_PLACEHOLDERS = {
 }
 
 -- Completion for vim.ui.input via :help input()-completion
-_G.claude_context_completion = function(_, cmdline)
+_G.pi_context_completion = function(_, cmdline)
   local start_idx, end_idx = cmdline:find('([^%s]+)$')
   local latest = start_idx and cmdline:sub(start_idx, end_idx) or nil
 
@@ -388,7 +359,7 @@ function M.open()
   if is_valid_buf(state.buf) then
     vim.api.nvim_buf_delete(state.buf, { force = true })
   end
-  -- Keep pending messages queued when opening a fresh Claude instance.
+  -- Keep pending messages queued when opening a fresh Pi instance.
   state.buf = nil
   state.win = nil
   state.job = nil
@@ -396,17 +367,15 @@ function M.open()
   local previous_win = vim.api.nvim_get_current_win()
   state.buf = vim.api.nvim_create_buf(false, false)
   vim.bo[state.buf].bufhidden = 'hide'
-  vim.bo[state.buf].filetype = 'claude'
+  vim.bo[state.buf].filetype = 'pi'
 
   vim.cmd('vnew')
   state.win = vim.api.nvim_get_current_win()
   vim.api.nvim_win_set_buf(state.win, state.buf)
   vim.api.nvim_win_set_width(state.win, math.floor(vim.o.columns * 0.35))
 
-  local env, model = claude_env()
-  state.job = vim.fn.jobstart(claude_command(model), {
+  state.job = vim.fn.jobstart({ 'pi' }, {
     term = true,
-    env = env,
     on_exit = function()
       vim.schedule(function()
         M.close()
@@ -481,8 +450,8 @@ function M.ask_input(opts)
   local values = current_context(selection)
 
   vim.ui.input({
-    prompt = 'ask claude: ',
-    completion = 'customlist,v:lua.claude_context_completion',
+    prompt = 'ask pi: ',
+    completion = 'customlist,v:lua.pi_context_completion',
   }, function(input)
     if not input or #input == 0 then
       return
@@ -490,7 +459,7 @@ function M.ask_input(opts)
 
     local rendered = apply_context_modifiers(input, values)
 
-    -- If visual selection exists and user didn't explicitly use @this,
+    -- If visual selection exists and the user didn't explicitly use @this,
     -- auto-attach selected content at send time.
     if selection and selection.text and #selection.text > 0 and not input:find('@this', 1, true) then
       rendered = rendered .. '\n\n' .. values['@this']
@@ -530,16 +499,16 @@ function M.get_state()
   return state
 end
 
-vim.api.nvim_create_user_command('ClaudeToggle', function()
-  require('plugins.claude').toggle()
+vim.api.nvim_create_user_command('PiToggle', function()
+  require('plugins.pi').toggle()
 end, {})
 
-vim.api.nvim_create_user_command('ClaudeClose', function()
-  require('plugins.claude').close()
+vim.api.nvim_create_user_command('PiClose', function()
+  require('plugins.pi').close()
 end, {})
 
-vim.api.nvim_create_user_command('ClaudeFocus', function()
-  require('plugins.claude').focus()
+vim.api.nvim_create_user_command('PiFocus', function()
+  require('plugins.pi').focus()
 end, {})
 
 return M

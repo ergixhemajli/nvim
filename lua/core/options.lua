@@ -22,6 +22,7 @@ vim.o.shiftwidth = 2
 vim.o.termguicolors = true
 vim.o.signcolumn = "yes"
 vim.o.autoread = true
+vim.o.scrolloff=15
 
 vim.cmd [[set completeopt+=menuone,noselect,popup]]
 
