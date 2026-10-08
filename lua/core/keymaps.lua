@@ -12,11 +12,10 @@ keymap('n', '<C-h>', '<C-w>h', { desc = 'Move focus left' })
 keymap('n', '<C-l>', '<C-w>l', { desc = 'Move focus right' })
 keymap('n', '<C-j>', '<C-w>j', { desc = 'Move focus down' })
 keymap('n', '<C-k>', '<C-w>k', { desc = 'Move focus up' })
-keymap('n', '<C-w>', ':close<CR>', { desc = 'Close current window' })
 
 -- Splits (Ctrl-based only)
 keymap('n', '<C-s>', ':split<CR>', { desc = 'Horizontal split' })
-keymap('n', '<C-v>', ':vsplit<CR>', { desc = 'Vertical split' })
+keymap('n', '<C-w>', ':vsplit<CR>', { desc = 'Vertical split' })
 
 -- Toggle terminal mode with Ctrl-Hjkl
 keymap('t', '<C-h>', '<C-\\><C-n><C-w>h', { desc = 'Terminal: switch to left window' })
