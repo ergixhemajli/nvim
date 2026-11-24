@@ -14,10 +14,6 @@ require('core.keymaps')
 vim.pack.add(require('plugins.spec'))
 require('plugins.config')
 
--- Custom plugins
-require('plugins.pi')
-require('plugins.sudo-oil')
-
 -- LSP
 require('lsp.config')
 

@@ -14,8 +14,8 @@ keymap('n', '<C-j>', '<C-w>j', { desc = 'Move focus down' })
 keymap('n', '<C-k>', '<C-w>k', { desc = 'Move focus up' })
 
 -- Splits (Ctrl-based only)
-keymap('n', '<C-s>', ':split<CR>', { desc = 'Horizontal split' })
-keymap('n', '<C-w>', ':vsplit<CR>', { desc = 'Vertical split' })
+keymap('n', '<leader>sh', ':split<CR>', { desc = 'Horizontal split' })
+keymap('n', '<C-s>', ':vsplit<CR>', { desc = 'Vertical split' })
 
 -- Toggle terminal mode with Ctrl-Hjkl
 keymap('t', '<C-h>', '<C-\\><C-n><C-w>h', { desc = 'Terminal: switch to left window' })

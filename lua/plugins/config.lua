@@ -2,14 +2,20 @@ require('mason').setup({
   ui = {
     border = 'rounded',
     keymaps = {
-      apply_language_filter = false,
+      apply_language_filter = '<Nop>',
     },
   },
 })
 
 local oil = require("oil")
 
+local mtime_sort = {
+	{ "type", "asc" },
+	{ "mtime", "desc" },
+}
+
 oil.setup({
+	columns = { "icon" },
 	keymaps = {
 		["<C-h>"] = false,
 		["<C-l>"] = false,
@@ -17,40 +23,11 @@ oil.setup({
 		["<C-j>"] = false,
 	},
 	view_options = {
-    sort = {
-      { "birthtime", "desc" },
-    },
-  },
+		sort = mtime_sort,
+	},
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "oil",
-  callback = function()
-    local dir = oil.get_current_dir()
-    if not dir then
-      return
-    end
 
-    -- Look for .git, but stop at your home folder so directories like ~/Downloads sort correctly
-    local git_roots = vim.fs.find(".git", {
-      path = dir,
-      upward = true,
-      type = "directory",
-      stop = vim.uv.os_homedir(),
-    })
-
-    if #git_roots > 0 then
-      -- Reset to oil's default project sorting when inside a git repo
-      oil.set_sort({
-        { "type", "asc" },
-        { "name", "asc" },
-      })
-    else
-      -- Force date sorting if the autocommand re-triggers
-      oil.set_sort({ { "birthtime", "desc" } })
-    end
-  end,
-})
 
 require('telescope').setup()
 
@@ -118,3 +95,13 @@ vim.schedule(function()
         })
     end
 end)
+
+-- Custom plugins
+require('plugins.pi')
+require('plugins.sudo-oil')
+require('plugins.docx-viewer').setup({
+  pandoc_args = { "-f", "docx", "-t", "markdown", "--wrap=none" },
+  filetype = "markdown",
+})
+
+

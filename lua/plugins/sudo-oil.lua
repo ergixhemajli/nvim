@@ -3,8 +3,7 @@ local M = {}
 local defaults = {
   scratch_remote_dir = '/tmp',
   win = { width = 60, height = 6, border = 'single' },
-  -- Bigger window used for :RemoteShell / :SudoShell, since those are
-  -- meant for actually typing commands, not just a password prompt.
+  -- Bigger window for actually typing commands, not just a password prompt.
   shell_win = { width = 100, height = 30, border = 'single' },
 }
 

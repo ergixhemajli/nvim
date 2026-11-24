@@ -383,6 +383,12 @@ function M.open()
     end,
   })
 
+  vim.keymap.set('t', '<Esc>', function()
+    if state.job and state.job > 0 then
+      vim.fn.chansend(state.job, '\27')
+    end
+  end, { buffer = state.buf, desc = 'Pi: send Escape' })
+
   vim.api.nvim_set_current_win(previous_win)
   vim.defer_fn(flush_pending, 200)
 end

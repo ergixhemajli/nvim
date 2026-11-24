@@ -83,6 +83,9 @@ setup('kotlin_lsp', {
 	single_file_support = false,
 	root_dir = function(bufnr, on_dir)
 		local fname = vim.api.nvim_buf_get_name(bufnr)
+		if fname:match('^diffview://') then
+			return
+		end
 		local git = vim.fs.find('.git', { path = fname, upward = true })[1]
 		on_dir(git and vim.fs.dirname(git) or vim.fs.dirname(fname))
 	end,
